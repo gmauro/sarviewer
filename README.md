@@ -108,10 +108,10 @@ Please select a sa* file from the listed above: sa15
 ./system_data_reader.sh -f sa04 -m example@example.com
 
 # Send by email day 04 statistics between 09:00 and 12:00
-./system_data_reader.sh -f sa04 -s 09:00 -e 12:00 -m example@example.com
+./system_data_reader.sh -f sa04 -s 09:00:00 -e 12:00:00 -m example@example.com
 
 # Send by email day 05 statistics just since 10:00 
-./system_data_reader.sh -f sa05 -s 10:00 -m example@example.com
+./system_data_reader.sh -f sa05 -s 10:00:00 -m example@example.com
 
 # Just parse day 05 statistics
 ./system_data_reader.sh -f sa05
