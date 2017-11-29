@@ -28,22 +28,25 @@ cd $(dirname $0)
 # ======================
 
 dump_sar_info(){
+        rm -rf data
+        mkdir -p $nodename/data
 	# CPU
-	sar -u -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "CPU|Average|^$" > data/cpu.dat &
+	sar -u -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "CPU|Average|^$" > $nodename/data/cpu.dat &
 	# RAM
-	sar -r -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > data/ram.dat &
+	sar -r -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > $nodename/data/ram.dat &
 	# Swap
-	sar -S -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > data/swap.dat &
+	sar -S -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > $nodename/data/swap.dat &
 	# Load average and tasks
-	sar -q -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > data/loadaverage.dat &
+	sar -q -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > $nodename/data/loadaverage.dat &
 	# IO transfer
-	sar -b -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > data/iotransfer.dat &
+	sar -b -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > $nodename/data/iotransfer.dat &
 	# Process/context switches
-	sar -w -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > data/proc.dat &
+	sar -w -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > $nodename/data/proc.dat &
 	# Network Interface
-	sar -n DEV -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep $network_interface | grep -v "Average" > data/netinterface.dat &
+	sar -n DEV -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep $network_interface | grep -v "Average" > $nodename/data/netinterface.dat &
 	# Sockets
-	sar -n SOCK -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > data/sockets.dat &
+	sar -n SOCK -f $sysstat_logdir/$sa_file -s $start_time -e $end_time | grep -v -E "[a-zA-Z]|^$" > $nodename/data/sockets.dat &
+        ln -s $nodename/data data
 }
 
 check_sa_file(){
@@ -156,6 +159,9 @@ elif [ "$#" -ne 0 ];then
 				;;
 		esac
 	done
+
+        IFS='_' read -r -a nodename <<< $sa_file
+
 	# Check if the selected sa_file exists
 	check_sa_file
 
@@ -163,7 +169,9 @@ elif [ "$#" -ne 0 ];then
 	dump_sar_info
 
 	# Call plotter.sh to generate the graphs
+        mkdir -p graphs
 	./plotter.sh
+        mv graphs $nodename
 
 	# Send mail if specified
 	if [[ $mail_to ]];then
